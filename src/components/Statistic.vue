@@ -27,8 +27,9 @@
 
 <script>
 import CONFIG from '../constants'
-const { statisticApi, endpoints } = CONFIG
-const { host, port } = statisticApi
+const { endpoints } = CONFIG
+const host = process.env.API_HOST
+const port = process.env.API_PORT
 const { statistic, categories } = endpoints
 
 export default {
