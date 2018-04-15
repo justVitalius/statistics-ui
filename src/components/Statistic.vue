@@ -3,7 +3,8 @@
     <!--<img src="../assets/logo.png">
     <img src="../assets/sbt.png">-->
     <h1>{{ title }}</h1>
-    <table class="table">
+    <h2 v-if="!users.length">Нет данных</h2>
+    <table v-else class="table">
       <thead class="header">
         <tr>
           <th class="user-header">Username</th>
@@ -27,8 +28,10 @@
         </tr>
       </transition-group>
     </table>
-    <img src="../assets/logo.png">
-    <img src="../assets/sbt.png">
+    <div id="footer">
+      <img src="../assets/logo.png">
+      <img src="../assets/sbt.png">
+    </div>
   </div>
 </template>
 
@@ -101,12 +104,18 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  color: #fff;
+h1 {
   text-transform: uppercase;
   font-weight: 500;
   font-size: 1.75rem;
+  color: #fff;
 }
+
+h2 {
+  font-size: 1rem;
+  color: #fff;
+}
+
 .results {
   margin: 0;
   padding: 0;
