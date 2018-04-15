@@ -6,18 +6,21 @@
         <tr>
           <th>Имя пользователя</th>
           <th>ФИО</th>
-          <th v-for="category in categories" :key="category">
-            {{ category.name }}
+          <th v-for="category in categories" :key="category.title">
+            {{ category.title }}
           </th>
         </tr>
       </thead>
       <transition-group name="fade" tag="tbody" class="Results">
-        <tr v-for="user in users" :key="user">
+        <tr v-for="user in users" :key="user.id">
           <td>
             {{ user.username  }}
           </td>
           <td>
             {{ user.fio  }}
+          </td>
+          <td v-for="(answer, index) in user.answers" v-bind:key="index">
+            {{ answer.count }} ({{answer.percent}}%)
           </td>
         </tr>
       </transition-group>
@@ -27,10 +30,12 @@
 
 <script>
 import CONFIG from '../constants'
-const { endpoints } = CONFIG
+import { groupBy, orderBy } from 'lodash/collection'
+import { mapValues, get } from 'lodash/object'
+const { ENDPOINTS, REQUEST_INTERVAL } = CONFIG
 const host = process.env.API_HOST
 const port = process.env.API_PORT
-const { statistic, categories } = endpoints
+const { GAMERS, CATEGORIES } = ENDPOINTS
 
 export default {
   name: 'Statistic',
@@ -43,26 +48,49 @@ export default {
     }
   },
   methods: {
-    fetchCategories () {
-      fetch(`${this.baseUrl}${categories}`)
+    updateData (url, handler, repeatable) {
+      fetch(url)
         .then(stream => stream.json())
-        .then(data => {
-          this.categories = data
-        })
+        .then(handler)
         .catch(error => console.error(error))
+      if (repeatable) {
+        setTimeout(this.updateData, REQUEST_INTERVAL, url, handler, repeatable)
+      }
     },
-    fetchUsers () {
-      fetch(`${this.baseUrl}${statistic}`)
-        .then(stream => stream.json())
-        .then(data => {
+    fetchCategories () {
+      this.updateData(`${this.baseUrl}${CATEGORIES}`, data => {
+        this.categories = data
+        this.updateData(`${this.baseUrl}${GAMERS}`, data => {
+          data = data.map(item => {
+            let { answers = [] } = item
+            answers = mapValues(groupBy(answers, 'category'), (items) => {
+              return {
+                count: items.filter(item => item.isCorrect).length
+              }
+            })
+            return {
+              ...item,
+              answers: this.categories.map(category => {
+                const { title, numberOfNeedAnswers = 1 } = category
+                const { count } = get(answers, title, { count: 0 })
+                return {
+                  count,
+                  percent: count * 100 / numberOfNeedAnswers
+                }
+              })
+            }
+          })
+          data = orderBy(data, item => {
+            const { answers = [] } = item
+            return answers.reduce((total, answer) => total + answer.count, 0)
+          }, ['desc'])
           this.users = data
-        })
-        .catch(error => console.error(error))
+        }, true)
+      }, false)
     }
   },
   mounted () {
     this.fetchCategories()
-    this.fetchUsers()
   }
 }
 </script>
