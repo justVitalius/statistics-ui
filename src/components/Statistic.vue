@@ -1,22 +1,24 @@
 <template>
   <div class="statisticMainPage">
+    <!--<img src="../assets/logo.png">
+    <img src="../assets/sbt.png">-->
     <h1>{{ title }}</h1>
-    <table>
-      <thead>
+    <table class="table">
+      <thead class="header">
         <tr>
-          <th>Имя пользователя</th>
-          <th>ФИО</th>
+          <th class="user-header">Username</th>
+          <th class="fio-header">Name</th>
           <th v-for="category in categories" :key="category.title">
             {{ category.title }}
           </th>
         </tr>
       </thead>
-      <transition-group name="fade" tag="tbody" class="Results">
+      <transition-group name="fade" tag="tbody" class="results">
         <tr v-for="user in users" :key="user.id">
-          <td>
+          <td class="user-value">
             {{ user.username  }}
           </td>
-          <td>
+          <td class="fio-value">
             {{ user.fio  }}
           </td>
           <td v-for="(answer, index) in user.answers" v-bind:key="index">
@@ -25,6 +27,8 @@
         </tr>
       </transition-group>
     </table>
+    <img src="../assets/logo.png">
+    <img src="../assets/sbt.png">
   </div>
 </template>
 
@@ -41,7 +45,7 @@ export default {
   name: 'Statistic',
   data () {
     return {
-      title: 'Статистика по пользователям',
+      title: 'Javascript-конференция',
       users: [],
       categories: [],
       baseUrl: `${host}:${port}`
@@ -98,16 +102,18 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h1, h2 {
-  font-weight: normal;
+  color: #fff;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 1.75rem;
 }
-.Results {
+.results {
   margin: 0;
   padding: 0;
   text-align: left;
   position: relative;
 }
-.Results tr {
-  background: rgba(53, 73, 94, 0.3);
+.results tr {
   margin: 0;
   padding: 1em;
   list-style: none;
@@ -115,6 +121,44 @@ h1, h2 {
   border-bottom: 1px solid #394E62;
   transition: ease-in-out 0.5s;
 }
+
+.results td {
+  text-align: center;
+  padding: 10px 10px;
+  transition: ease-in-out 0.5s;
+}
+
+.header th {
+  text-align: center;
+  padding: 10px;
+  border: none;
+}
+
+.header tr {
+  background-color: #f9f9f9;
+  color: #777
+}
+
+.table {
+  width: 90%;
+  margin: auto;
+  background: #fff;
+}
+
+.user-header{
+  min-width: 50px;
+  width: 10%;
+}
+
+.fio-header{
+  min-width: 100px;
+  width: 15%;
+}
+
+.user-value, .fio-value {
+  text-align: left !important;
+}
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s;
 }
