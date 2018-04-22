@@ -59,7 +59,7 @@ export default {
       fetch(url)
         .then(stream => stream.json())
         .then(handler)
-        .catch(error => console.error(error))
+        .catch(console.error)
       if (repeatable) {
         setTimeout(this.updateData, REQUEST_INTERVAL, url, handler, repeatable)
       }
@@ -69,8 +69,8 @@ export default {
         this.categories = data
         this.updateData(`${this.baseUrl}${GAMERS}`, data => {
           data = data.map(item => {
-            let { answers = [] } = item
-            answers = mapValues(groupBy(answers, 'category'), (items) => {
+            const { answers = [] } = item
+            const correctAnswers = mapValues(groupBy(answers, 'category'), (items) => {
               return {
                 count: items.filter(item => item.isCorrect).length
               }
@@ -79,10 +79,10 @@ export default {
               ...item,
               answers: this.categories.map(category => {
                 const { title, numberOfNeedAnswers = 1 } = category
-                const { count } = get(answers, title, { count: 0 })
+                const { count } = get(correctAnswers, title, { count: 0 })
                 return {
                   count,
-                  percent: count * 100 / numberOfNeedAnswers
+                  percent: parseFloat(count * 100 / numberOfNeedAnswers).toFixed()
                 }
               })
             }
