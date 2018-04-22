@@ -4,13 +4,26 @@
 
 const path = require('path')
 
+const API_HOST = process.env.API_HOST || 'http://localhost'
+const API_PORT = process.env.API_PORT || 3000
+const BASE_URL = `${API_HOST}:${API_PORT}`
+
 module.exports = {
   dev: {
 
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/categories': {
+        target: BASE_URL,
+        changeOrigin: true
+      },
+      '/gamers': {
+        target: BASE_URL,
+        changeOrigin: true
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST

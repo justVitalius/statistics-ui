@@ -40,8 +40,6 @@ import CONFIG from '../constants'
 import { groupBy, orderBy } from 'lodash/collection'
 import { mapValues, get } from 'lodash/object'
 const { ENDPOINTS, REQUEST_INTERVAL } = CONFIG
-const host = process.env.API_HOST
-const port = process.env.API_PORT
 const { GAMERS, CATEGORIES } = ENDPOINTS
 
 export default {
@@ -50,8 +48,7 @@ export default {
     return {
       title: 'Javascript-конференция',
       users: [],
-      categories: [],
-      baseUrl: `${host}:${port}`
+      categories: []
     }
   },
   methods: {
@@ -65,9 +62,9 @@ export default {
       }
     },
     fetchCategories () {
-      this.updateData(`${this.baseUrl}${CATEGORIES}`, data => {
+      this.updateData(`${CATEGORIES}`, data => {
         this.categories = data
-        this.updateData(`${this.baseUrl}${GAMERS}`, data => {
+        this.updateData(`${GAMERS}`, data => {
           data = data.map(item => {
             const { answers = [] } = item
             const correctAnswers = mapValues(groupBy(answers, 'category'), (items) => {
