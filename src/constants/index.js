@@ -1,6 +1,7 @@
 export default {
-  endpoints: {
-    statistic: '/statistic',
-    categories: '/categories'
-  }
+  ENDPOINTS: {
+    GAMERS: '/gamers',
+    CATEGORIES: '/categories'
+  },
+  REQUEST_INTERVAL: 60000
 }

@@ -1,85 +1,128 @@
 <template>
   <div class="statisticMainPage">
+    <!--<img src="../assets/logo.png">
+    <img src="../assets/sbt.png">-->
     <h1>{{ title }}</h1>
-    <table>
-      <thead>
+    <h2 v-if="!users.length">Нет данных</h2>
+    <table v-else class="table">
+      <thead class="header">
         <tr>
-          <th>Имя пользователя</th>
-          <th>ФИО</th>
-          <th v-for="category in categories" :key="category">
-            {{ category.name }}
+          <th class="user-header">Username</th>
+          <th class="fio-header">Name</th>
+          <th v-for="category in categories" :key="category.title">
+            {{ category.title }}
           </th>
         </tr>
       </thead>
-      <transition-group name="fade" tag="tbody" class="Results">
-        <tr v-for="user in users" :key="user">
-          <td>
+      <transition-group name="fade" tag="tbody" class="results">
+        <tr v-for="user in users" :key="user.id">
+          <td class="user-value">
             {{ user.username  }}
           </td>
-          <td>
+          <td class="fio-value">
             {{ user.fio  }}
+          </td>
+          <td v-for="(answer, index) in user.answers" v-bind:key="index">
+            {{ answer.count }} ({{answer.percent}}%)
           </td>
         </tr>
       </transition-group>
     </table>
+    <div id="footer">
+      <img src="../assets/logo.png">
+      <img src="../assets/sbt.png">
+    </div>
   </div>
 </template>
 
 <script>
 import CONFIG from '../constants'
-const { endpoints } = CONFIG
+import { groupBy, orderBy } from 'lodash/collection'
+import { mapValues, get } from 'lodash/object'
+const { ENDPOINTS, REQUEST_INTERVAL } = CONFIG
 const host = process.env.API_HOST
 const port = process.env.API_PORT
-const { statistic, categories } = endpoints
+const { GAMERS, CATEGORIES } = ENDPOINTS
 
 export default {
   name: 'Statistic',
   data () {
     return {
-      title: 'Статистика по пользователям',
+      title: 'Javascript-конференция',
       users: [],
       categories: [],
       baseUrl: `${host}:${port}`
     }
   },
   methods: {
-    fetchCategories () {
-      fetch(`${this.baseUrl}${categories}`)
+    updateData (url, handler, repeatable) {
+      fetch(url)
         .then(stream => stream.json())
-        .then(data => {
-          this.categories = data
-        })
-        .catch(error => console.error(error))
+        .then(handler)
+        .catch(console.error)
+      if (repeatable) {
+        setTimeout(this.updateData, REQUEST_INTERVAL, url, handler, repeatable)
+      }
     },
-    fetchUsers () {
-      fetch(`${this.baseUrl}${statistic}`)
-        .then(stream => stream.json())
-        .then(data => {
+    fetchCategories () {
+      this.updateData(`${this.baseUrl}${CATEGORIES}`, data => {
+        this.categories = data
+        this.updateData(`${this.baseUrl}${GAMERS}`, data => {
+          data = data.map(item => {
+            const { answers = [] } = item
+            const correctAnswers = mapValues(groupBy(answers, 'category'), (items) => {
+              return {
+                count: items.filter(item => item.isCorrect).length
+              }
+            })
+            return {
+              ...item,
+              answers: this.categories.map(category => {
+                const { title, numberOfNeedAnswers = 1 } = category
+                const { count } = get(correctAnswers, title, { count: 0 })
+                return {
+                  count,
+                  percent: parseFloat(count * 100 / numberOfNeedAnswers).toFixed()
+                }
+              })
+            }
+          })
+          data = orderBy(data, item => {
+            const { answers = [] } = item
+            return answers.reduce((total, answer) => total + answer.count, 0)
+          }, ['desc'])
           this.users = data
-        })
-        .catch(error => console.error(error))
+        }, true)
+      }, false)
     }
   },
   mounted () {
     this.fetchCategories()
-    this.fetchUsers()
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
+h1 {
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 1.75rem;
+  color: #fff;
 }
-.Results {
+
+h2 {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.results {
   margin: 0;
   padding: 0;
   text-align: left;
   position: relative;
 }
-.Results tr {
-  background: rgba(53, 73, 94, 0.3);
+.results tr {
   margin: 0;
   padding: 1em;
   list-style: none;
@@ -87,6 +130,44 @@ h1, h2 {
   border-bottom: 1px solid #394E62;
   transition: ease-in-out 0.5s;
 }
+
+.results td {
+  text-align: center;
+  padding: 10px 10px;
+  transition: ease-in-out 0.5s;
+}
+
+.header th {
+  text-align: center;
+  padding: 10px;
+  border: none;
+}
+
+.header tr {
+  background-color: #f9f9f9;
+  color: #777
+}
+
+.table {
+  width: 90%;
+  margin: auto;
+  background: #fff;
+}
+
+.user-header{
+  min-width: 50px;
+  width: 10%;
+}
+
+.fio-header{
+  min-width: 100px;
+  width: 15%;
+}
+
+.user-value, .fio-value {
+  text-align: left !important;
+}
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s;
 }
