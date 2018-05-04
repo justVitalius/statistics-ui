@@ -75,11 +75,13 @@ export default {
             return {
               ...item,
               answers: this.categories.map(category => {
-                const { title, numberOfNeedAnswers = 1 } = category
+                const { title, numberOfRequiredAnswers = 1 } = category
                 const { count } = get(correctAnswers, title, { count: 0 })
+                let percent = parseFloat(count * 100 / numberOfRequiredAnswers).toFixed()
+                percent = percent > 100 ? 100 : percent
                 return {
                   count,
-                  percent: parseFloat(count * 100 / numberOfNeedAnswers).toFixed()
+                  percent
                 }
               })
             }
