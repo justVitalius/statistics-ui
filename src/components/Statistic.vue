@@ -23,7 +23,7 @@
             {{ user.fio  }}
           </td>
           <td v-for="(answer, index) in user.answers" v-bind:key="index">
-            {{ answer.count }} ({{answer.percent}}%)
+            {{ answer.count }}/{{answer.totalCount}} ({{answer.percent}}%)
           </td>
         </tr>
       </transition-group>
@@ -69,18 +69,20 @@ export default {
             const { answers = [] } = item
             const correctAnswers = mapValues(groupBy(answers, 'category'), (items) => {
               return {
-                count: items.filter(item => item.isCorrect).length
+                count: items.filter(item => item.isCorrect).length,
+                totalCount: items.length
               }
             })
             return {
               ...item,
               answers: this.categories.map(category => {
                 const { title, numberOfRequiredAnswers = 1 } = category
-                const { count } = get(correctAnswers, title, { count: 0 })
+                const { count, totalCount } = get(correctAnswers, title, { count: 0, totalCount: 0 })
                 let percent = parseFloat(count * 100 / numberOfRequiredAnswers).toFixed()
                 percent = percent > 100 ? 100 : percent
                 return {
                   count,
+                  totalCount,
                   percent
                 }
               })
