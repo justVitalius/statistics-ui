@@ -1,13 +1,10 @@
 <template>
   <div class="statisticMainPage">
-    <!--<img src="../assets/logo.png">
-    <img src="../assets/sbt.png">-->
     <h1>{{ title }}</h1>
     <h2 v-if="!users.length">Нет данных</h2>
     <table v-else class="table">
       <thead class="header">
         <tr>
-          <th class="user-header">Username</th>
           <th class="fio-header">Name</th>
           <th v-for="category in categories" :key="category.title">
             {{ category.title }}
@@ -16,14 +13,13 @@
       </thead>
       <transition-group name="fade" tag="tbody" class="results">
         <tr v-for="user in users" :key="user.id">
-          <td class="user-value">
-            {{ user.username  }}
-          </td>
           <td class="fio-value">
             {{ user.fio  }}
+            <span class="ghost-value">/ {{ user.username  }} </span>
           </td>
           <td v-for="(answer, index) in user.answers" v-bind:key="index">
-            {{ answer.count }}/{{answer.totalCount}} ({{answer.percent}}%)
+            {{ answer.count }}/{{answer.totalCount}}
+            <span class="ghost-value">/ ({{answer.percent}}%) </span>
           </td>
         </tr>
       </transition-group>
@@ -46,7 +42,7 @@ export default {
   name: 'Statistic',
   data () {
     return {
-      title: 'Javascript-конференция',
+      title: 'Сбертех бот. Таблица участников',
       users: [],
       categories: []
     }
@@ -105,11 +101,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.ghost-value {
+  color: gray;
+}
 h1 {
-  text-transform: uppercase;
   font-weight: 500;
   font-size: 1.75rem;
   color: #fff;
+  font-family: Roboto, Arial, sans-serif;
 }
 
 h2 {
@@ -136,6 +135,7 @@ h2 {
   text-align: center;
   padding: 10px 10px;
   transition: ease-in-out 0.5s;
+  border-bottom: 1px solid #ccc;
 }
 
 .header th {
@@ -175,4 +175,21 @@ h2 {
 .fade-enter, .fade-leave-to {
   opacity: 0;
 }
+
+  @media print {
+    body {
+      background: none;
+    }
+
+    #footer, .header, h1 {
+      display: none;
+    }
+
+    table td, table th { display: none; }
+
+    table .fio-header, body .fio-value{
+      width: 100%;
+      display: table-cell;
+    }
+  }
 </style>
