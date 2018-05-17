@@ -13,12 +13,14 @@ export default {
 <style>
   body {
     margin: 0;
-    background-image: url('assets/holyjs-back4.jpg');
+    /*background-image: url('assets/holyjs-back4.jpg');*/
     min-height: 100%;
-    background-attachment: fixed;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    /*background-attachment: fixed;*/
+    /*background-position: center;*/
+    /*background-repeat: no-repeat;*/
+    /*background-size: cover;*/
+
+    background: linear-gradient(23deg, #2fb235, #78c232);
   }
   #app {
     font-family: Ubuntu, sans-serif;
