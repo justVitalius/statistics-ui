@@ -9,6 +9,7 @@
           <th v-for="category in categories" :key="category.title">
             {{ category.title }}
           </th>
+          <th>Всего</th>
         </tr>
       </thead>
       <transition-group name="fade" tag="tbody" class="results">
@@ -21,6 +22,7 @@
             {{ answer.count }}/{{answer.totalCount}}
             <span class="ghost-value">/ ({{answer.percent}}%) </span>
           </td>
+          <td>{{ user.allCorrectAnswers }} / {{ user.allAnswersCount }}</td>
         </tr>
       </transition-group>
     </table>
@@ -63,6 +65,8 @@ export default {
         this.updateData(`${GAMERS}`, data => {
           data = data.map(item => {
             const { answers = [] } = item
+            const allAnswersCount = answers.length
+            const allCorrectAnswers = answers.filter(item => item.isCorrect).length
             const correctAnswers = mapValues(groupBy(answers, 'category'), (items) => {
               return {
                 count: items.filter(item => item.isCorrect).length,
@@ -70,6 +74,8 @@ export default {
               }
             })
             return {
+              allCorrectAnswers,
+              allAnswersCount,
               ...item,
               answers: this.categories.map(category => {
                 const { title, numberOfRequiredAnswers = 1 } = category
@@ -190,6 +196,7 @@ h2 {
     table .fio-header, body .fio-value{
       width: 100%;
       display: table-cell;
+      height: 60px;
     }
   }
 </style>
